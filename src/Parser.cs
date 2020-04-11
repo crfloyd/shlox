@@ -53,11 +53,93 @@ namespace shlox
         }
 
         private Stmt Statement()
-            => Match(TokenType.PRINT)
-                ? PrintStatement()
-                : Match(TokenType.LEFT_BRACE)
-                    ? new Block(Block())
+            => Match(TokenType.FOR)
+                ? ForStatement()
+                : Match(TokenType.IF)
+                    ? IfStatement()
+                    : Match(TokenType.PRINT)
+                        ? PrintStatement()
+                        : Match(TokenType.WHILE)
+                            ? WhileStatement()
+                            : Match(TokenType.LEFT_BRACE)
+                                ? new Block(Block())
+                                : ExpressionStatement();
+
+        private Stmt ForStatement()
+        {
+            Consume(TokenType.LEFT_PAREN, "Expect '(' after 'for'.");
+
+            // If the token following the ( is a semicolon then the initializer
+            // has been omitted. Otherwise, we check for a var keyword to see
+            // if it’s a variable declaration. If neither of those matched, it
+            // must be an expression. We parse that and wrap it in an expression
+            // statement so that the initializer is always of type Stmt
+            Stmt initializer = Match(TokenType.SEMICOLON)
+                ? null
+                : Match(TokenType.VAR)
+                    ? VarDeclaration()
                     : ExpressionStatement();
+
+            // If next token is a semicolon then the condition has been omitted.
+            Expr condition = Check(TokenType.SEMICOLON) ? null : Expression();
+            Consume(TokenType.SEMICOLON, "Expect ';' after loop condition.");
+
+            // If next token is closing right paren, increment ommitted.
+            Expr increment = Check(TokenType.RIGHT_PAREN) ? null : Expression();
+            Consume(TokenType.RIGHT_PAREN, "Expect ')' after for clauses.");
+
+            var body = Statement();
+
+            // Add the increment expression evaluation to end of body if not null
+            if (increment != null)
+            {
+                body = new Block(new List<Stmt> { body, new Expression(increment) });
+            }
+
+            // Wrap the body into a while based on condition. If null then set
+            // condition to true (infinite loop)
+            if (condition is null) condition = new Literal(true);
+            body = new While(condition, body);
+
+            // If initializer was set, wrap body in block with initializer to run
+            // first before the loop body is executed
+            if (initializer != null)
+            {
+                body = new Block(new List<Stmt> { initializer, body });
+            }
+
+            return body;
+
+
+        }
+
+        /// <summary>
+        /// whileStmt → "while" "(" expression ")" statement ;
+        /// </summary>
+        /// <returns></returns>
+        private Stmt WhileStatement()
+        {
+            Consume(TokenType.LEFT_PAREN, "Expect '(' after 'while'.");
+            var condition = Expression();
+            Consume(TokenType.RIGHT_PAREN, "Expect ')' after 'while'.");
+            var body = Statement();
+            return new While(condition, body);
+        }
+
+        /// <summary>
+        /// ifStmt → "if" "(" expression ")" statement ( "else" statement )? ;
+        /// </summary>
+        /// <returns></returns>
+        private Stmt IfStatement()
+        {
+            Consume(TokenType.LEFT_PAREN, "Expect '(' after 'if'.");
+            var condition = Expression();
+            Consume(TokenType.RIGHT_PAREN, "Expect ')' after if condition.");
+
+            var thenBranch = Statement();
+            var elseBranch = Match(TokenType.ELSE) ? Statement() : null;
+            return new If(condition, thenBranch, elseBranch);
+        }
 
         private Stmt PrintStatement()
         {
@@ -75,7 +157,7 @@ namespace shlox
 
         private Expr Assignment()
         {
-            var expr = Equality();
+            var expr = Or();
             if (Match(TokenType.EQUAL))
             {
                 var equals = Previous();
@@ -86,6 +168,38 @@ namespace shlox
                     return new Assign(name, value);
                 }
                 Error(equals, "Invalid assignment target.");
+            }
+            return expr;
+        }
+
+        /// <summary>
+        /// logic_or → logic_and ( "or" logic_and )* ;
+        /// </summary>
+        /// <returns></returns>
+        private Expr Or()
+        {
+            var expr = And();
+            while (Match(TokenType.OR))
+            {
+                var op = Previous();
+                var right = And();
+                expr = new Logical(expr, op, right);
+            }
+            return expr;
+        }
+
+        /// <summary>
+        /// logic_and → equality ( "and" equality )* ;
+        /// </summary>
+        /// <returns></returns>
+        private Expr And()
+        {
+            var expr = Equality();
+            while (Match(TokenType.AND))
+            {
+                var op = Previous();
+                var right = Equality();
+                expr = new Logical(expr, op, right);
             }
             return expr;
         }

@@ -39,6 +39,11 @@ namespace shlox
             return expr.Value.ToString();
         }
 
+        public string VisitLogicalExpr(Logical expr)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public string VisitUnaryExpr(Unary expr)
         {
             return Parenthesize(expr.Op.Lexeme, expr.Right);

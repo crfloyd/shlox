@@ -10,8 +10,10 @@ namespace shlox
     {
         T VisitBlockStmt(Block stmt);
         T VisitExpressionStmt(Expression stmt);
+        T VisitIfStmt(If stmt);
         T VisitPrintStmt(Print stmt);
         T VisitVarStmt(Var stmt);
+        T VisitWhileStmt(While stmt);
     }
 
     public class Block : Stmt
@@ -44,6 +46,25 @@ namespace shlox
         }
     }
 
+    public class If : Stmt
+    {
+        public Expr Condition { get; }
+        public Stmt Thenbranch { get; }
+        public Stmt Elsebranch { get; }
+
+        public If(Expr condition, Stmt thenBranch, Stmt elseBranch)
+        {
+            Condition = condition;
+            Thenbranch = thenBranch;
+            Elsebranch = elseBranch;
+        }
+
+        public override T Accept<T>(IStmtVisitor<T> visitor)
+        {
+            return visitor.VisitIfStmt(this);
+        }
+    }
+
     public class Print : Stmt
     {
         public Expr Expr { get; }
@@ -73,6 +94,23 @@ namespace shlox
         public override T Accept<T>(IStmtVisitor<T> visitor)
         {
             return visitor.VisitVarStmt(this);
+        }
+    }
+
+    public class While : Stmt
+    {
+        public Expr Condition { get; }
+        public Stmt Body { get; }
+
+        public While(Expr condition, Stmt body)
+        {
+            Condition = condition;
+            Body = body;
+        }
+
+        public override T Accept<T>(IStmtVisitor<T> visitor)
+        {
+            return visitor.VisitWhileStmt(this);
         }
     }
 }

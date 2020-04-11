@@ -65,6 +65,20 @@ namespace shlox
 
         public object VisitLiteralExpr(Literal expr) => expr.Value;
 
+        public object VisitLogicalExpr(Logical expr)
+        {
+            var left = Evaluate(expr.Left);
+            if (expr.Op.Type == TokenType.OR)
+            {
+                if (IsTruthy(left)) return left;
+            }
+            else
+            {
+                if (!IsTruthy(left)) return left;
+            }
+            return Evaluate(expr.Right);
+        }
+
         public object VisitUnaryExpr(Unary expr)
         {
             var right = Evaluate(expr.Right);
@@ -147,6 +161,15 @@ namespace shlox
             return null;
         }
 
+        public object VisitWhileStmt(While stmt)
+        {
+            while (IsTruthy(Evaluate(stmt.Condition)))
+            {
+                Execute(stmt.Body);
+            }
+            return null;
+        }
+
         public object VisitAssignExpr(Assign expr)
         {
             var value = Evaluate(expr.Value);
@@ -157,6 +180,19 @@ namespace shlox
         public object VisitBlockStmt(Block stmt)
         {
             ExecuteBlock(stmt.Statements, new Environment(_environment));
+            return null;
+        }
+
+        public object VisitIfStmt(If stmt)
+        {
+            if (IsTruthy(Evaluate(stmt.Condition)))
+            {
+                Execute(stmt.Thenbranch);
+            }
+            else if (stmt.Elsebranch != null)
+            {
+                Execute(stmt.Elsebranch);
+            }
             return null;
         }
 
