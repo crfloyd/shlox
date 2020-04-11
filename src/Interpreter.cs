@@ -12,6 +12,7 @@ namespace shlox
         {
             _environment = new Environment();
         }
+
         public void Interpret(IEnumerable<Stmt> statements)
         {
             try
@@ -150,7 +151,30 @@ namespace shlox
         {
             var value = Evaluate(expr.Value);
             _environment.Assign(expr.Name, value);
-            return value;
+            return null;
+        }
+
+        public object VisitBlockStmt(Block stmt)
+        {
+            ExecuteBlock(stmt.Statements, new Environment(_environment));
+            return null;
+        }
+
+        private void ExecuteBlock(List<Stmt> statements, Environment environment)
+        {
+            var previous = _environment;
+            try
+            {
+                _environment = environment;
+                foreach (var statement in statements)
+                {
+                    Execute(statement);
+                }
+            }
+            finally
+            {
+                _environment = previous;
+            }
         }
     }
 }

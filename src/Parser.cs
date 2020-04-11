@@ -55,7 +55,9 @@ namespace shlox
         private Stmt Statement()
             => Match(TokenType.PRINT)
                 ? PrintStatement()
-                : ExpressionStatement();
+                : Match(TokenType.LEFT_BRACE)
+                    ? new Block(Block())
+                    : ExpressionStatement();
 
         private Stmt PrintStatement()
         {
@@ -86,6 +88,21 @@ namespace shlox
                 Error(equals, "Invalid assignment target.");
             }
             return expr;
+        }
+
+        /// <summary>
+        /// block → "{" declaration* "}" ;
+        /// </summary>
+        /// <returns></returns>
+        private List<Stmt> Block()
+        {
+            var statements = new List<Stmt>();
+            while (!Check(TokenType.RIGHT_BRACE) && !IsAtEnd())
+            {
+                statements.Add(Declaration());
+            }
+            Consume(TokenType.RIGHT_BRACE, "Expect '}' after block.");
+            return statements;
         }
 
         private Expr Expression() => Assignment();

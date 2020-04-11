@@ -1,4 +1,4 @@
-using System;
+using System.Collections.Generic;
 namespace shlox
 {
     public abstract class Stmt
@@ -8,9 +8,25 @@ namespace shlox
 
     public interface IStmtVisitor<T>
     {
+        T VisitBlockStmt(Block stmt);
         T VisitExpressionStmt(Expression stmt);
         T VisitPrintStmt(Print stmt);
         T VisitVarStmt(Var stmt);
+    }
+
+    public class Block : Stmt
+    {
+        public List<Stmt> Statements { get; }
+
+        public Block(List<Stmt> statements)
+        {
+            Statements = statements;
+        }
+
+        public override T Accept<T>(IStmtVisitor<T> visitor)
+        {
+            return visitor.VisitBlockStmt(this);
+        }
     }
 
     public class Expression : Stmt

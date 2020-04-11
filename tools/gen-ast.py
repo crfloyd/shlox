@@ -3,8 +3,8 @@ import sys
 def define_ast(output_dir, base_name, types):
     path = outputDir + "/" + base_name + ".cs"
     out_file = open(path, 'w')
-    out_file.write("using System;\n")
-    out_file.write("namespace Lox\n")
+    out_file.write("using System.Collections.Generic;\n")
+    out_file.write("namespace shlox\n")
     out_file.write("{\n")
     out_file.write(f"    public abstract class {base_name}\n")
     out_file.write("    {\n")
@@ -29,7 +29,7 @@ def define_visitor(f, base_name, types):
     f.write("    {\n")
     for t in types:
         name = t.split(":")[0].strip()
-        f.write(f"          T Visit{name.capitalize()}{base_name}({name.capitalize()} {base_name.lower()});\n")
+        f.write(f"        T Visit{name.capitalize()}{base_name}({name.capitalize()} {base_name.lower()});\n")
     f.write("    }\n")
 
 def define_type(file, base_name, class_name, field_list):
