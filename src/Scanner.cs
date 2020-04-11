@@ -234,7 +234,7 @@ namespace shlox
         /// Consumes the next token and returns it
         /// </summary>
         /// <returns></returns>
-		private char Advance()
+        private char Advance()
         {
             _current++;
             return _source[_current - 1];
