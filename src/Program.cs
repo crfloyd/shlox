@@ -6,7 +6,7 @@ namespace shlox
 {
     class Program
     {
-	    static bool _hadError = false;
+        static bool _hadError = false;
         static bool _hadRuntimeError = false;
         private static readonly Interpreter _interpreter = new Interpreter();
 
@@ -30,12 +30,12 @@ namespace shlox
         {
             var text = File.ReadAllText(path);
             Run(text);
-            
+
             // Indicate an error in the exit code.
             if (_hadError) System.Environment.Exit(65);
             if (_hadRuntimeError) System.Environment.Exit(70);
-	    }
-	
+        }
+
         private static void RunPrompt()
         {
             while (true)
@@ -46,8 +46,8 @@ namespace shlox
                 _hadError = false;
             }
         }
-        
-        private static void Run(string source) 
+
+        private static void Run(string source)
         {
             var scanner = new Scanner(source);
             var tokens = scanner.ScanTokens();
@@ -59,9 +59,9 @@ namespace shlox
 
             //Console.WriteLine(new AstPrinter().Print(expression));
             _interpreter.Interpret(statements);
-            
+
         }
-        
+
         public static void Error(int line, string message)
         {
             Report(line, "", message);

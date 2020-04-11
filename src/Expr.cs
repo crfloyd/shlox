@@ -8,12 +8,12 @@ namespace shlox
 
     public interface IExprVisitor<T>
     {
-          T VisitAssignExpr(Assign expr);
-          T VisitBinaryExpr(Binary expr);
-          T VisitGroupingExpr(Grouping expr);
-          T VisitLiteralExpr(Literal expr);
-          T VisitUnaryExpr(Unary expr);
-          T VisitVariableExpr(Variable expr);
+        T VisitAssignExpr(Assign expr);
+        T VisitBinaryExpr(Binary expr);
+        T VisitGroupingExpr(Grouping expr);
+        T VisitLiteralExpr(Literal expr);
+        T VisitUnaryExpr(Unary expr);
+        T VisitVariableExpr(Variable expr);
     }
 
     public class Assign : Expr

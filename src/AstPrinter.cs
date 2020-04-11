@@ -7,7 +7,7 @@ namespace shlox
 
         public AstPrinter()
         {
-            
+
         }
 
         public string Print(Expr expr)

@@ -174,7 +174,7 @@ namespace shlox
         {
             if (Check(type)) return Advance();
             throw Error(Peek(), errorMessage);
-        }       
+        }
 
 
         /// <summary>

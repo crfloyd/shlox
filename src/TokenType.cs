@@ -3,9 +3,9 @@ namespace shlox
     public enum TokenType
     {
         // Single-character tokens.
-        LEFT_PAREN, 
-        RIGHT_PAREN, 
-        LEFT_BRACE, 
+        LEFT_PAREN,
+        RIGHT_PAREN,
+        LEFT_BRACE,
         RIGHT_BRACE,
         COMMA,
         DOT,
@@ -14,7 +14,7 @@ namespace shlox
         SEMICOLON,
         SLASH,
         STAR,
-        
+
         // One or two character tokens.
         BANG,
         BANG_EQUAL,
@@ -24,12 +24,12 @@ namespace shlox
         GREATER_EQUAL,
         LESS,
         LESS_EQUAL,
-        
+
         // Literals
         IDENTIFIER,
         STRING,
         NUMBER,
-        
+
         // Keywords
         AND,
         CLASS,
@@ -47,7 +47,7 @@ namespace shlox
         TRUE,
         VAR,
         WHILE,
-        
+
         EOF
     }
 }

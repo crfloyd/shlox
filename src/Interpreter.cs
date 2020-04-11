@@ -44,7 +44,7 @@ namespace shlox
                 TokenType.SLASH when CheckNumberOperands(expr.Op, left, right) => left switch
                 {
                     double _ when right is double rd && rd == 0.0 => throw new RuntimeException(expr.Op, "Division by zero not allowed."),
-                    double ld when right is double rd => ld/rd
+                    double ld when right is double rd => ld / rd
                 },
                 TokenType.SLASH when CheckNumberOperands(expr.Op, left, right) => (double)left / (double)right,
                 TokenType.STAR when CheckNumberOperands(expr.Op, left, right) => (double)left * (double)right,

@@ -18,13 +18,11 @@ namespace shlox
         public string VisitBinaryExpr(Binary expr)
         {
             return $"{expr.Left.Accept(this)} {expr.Right.Accept(this)} {expr.Op.Lexeme}";
-            //return Rpn(expr.Left, expr.Right);
         }
 
         public string VisitGroupingExpr(Grouping expr)
         {
             return expr.Expression.Accept(this);
-            //return Rpn(expr.Expression);
         }
 
         public string VisitLiteralExpr(Literal expr)
