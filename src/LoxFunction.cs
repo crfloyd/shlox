@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using shlox.Exceptions;
 
 namespace shlox
 {
@@ -27,8 +28,16 @@ namespace shlox
                 environment.Define(parameterName, argumentValue);
             }
 
-            // Execute the body
-            interpreter.ExecuteBlock(_declaration.Body, environment);
+            // Execute the body. Using exceptions for return control
+            // flow due to heavily-recursive tree-walk.
+            try
+            {
+                interpreter.ExecuteBlock(_declaration.Body, environment);
+            }
+            catch (ReturnException ex)
+            {
+                return ex.Value;
+            }
 
             return null;
         }

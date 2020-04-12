@@ -61,11 +61,13 @@ namespace shlox
                     ? IfStatement()
                     : Match(TokenType.PRINT)
                         ? PrintStatement()
-                        : Match(TokenType.WHILE)
-                            ? WhileStatement()
-                            : Match(TokenType.LEFT_BRACE)
-                                ? new Block(Block())
-                                : ExpressionStatement();
+                        : Match(TokenType.RETURN)
+                            ? ReturnStatement()
+                            : Match(TokenType.WHILE)
+                                ? WhileStatement()
+                                : Match(TokenType.LEFT_BRACE)
+                                    ? new Block(Block())
+                                    : ExpressionStatement();
 
         private Stmt ForStatement()
         {
@@ -111,8 +113,6 @@ namespace shlox
             }
 
             return body;
-
-
         }
 
         /// <summary>
@@ -148,6 +148,20 @@ namespace shlox
             var value = Expression();
             Consume(TokenType.SEMICOLON, "Expect ';' after value.");
             return new Print(value);
+        }
+
+        /// <summary>
+        /// returnStmt → "return" expression? ";" ;
+        /// </summary>
+        /// <returns></returns>
+        private Stmt ReturnStatement()
+        {
+            var keyword = Previous();
+            var value = Check(TokenType.SEMICOLON)
+                ? null
+                : Expression();
+            Consume(TokenType.SEMICOLON, "Expect ';' after return value");
+            return new Return(keyword, value);
         }
 
         private Stmt ExpressionStatement()

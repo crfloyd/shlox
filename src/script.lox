@@ -1,0 +1,8 @@
+fun sayHi(first, last) {
+  print "Hi, " + first + " " + last + "!";
+}
+var start = clock();
+sayHi("Dear", "Reader");
+var end = clock();
+var elapsed = end - start;
+print elapsed;

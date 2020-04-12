@@ -179,6 +179,12 @@ namespace shlox
             return null;
         }
 
+        public object VisitReturnStmt(Return stmt)
+        {
+            var value = stmt.Value is null ? null : Evaluate(stmt.Value);
+            throw new ReturnException(value);
+        }
+
         public object VisitVarStmt(Var stmt)
         {
             var value = stmt.Initializer == null
