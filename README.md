@@ -1,5 +1,5 @@
 # shlox
-This is a C# implementation of a Lox interpreter. The Lox language is based on Bob Nystrom's Book "[Crafting Interpreters](http://craftinginterpreters.com/introduction.html)". This project can be run in REPL mode or against a file by passing it a the first argument.
+shlox is a C# implementation of a parser and interpreter for the Lox programming language. This interpreter and the Lox language is based on Bob Nystrom's Book "[Crafting Interpreters](http://craftinginterpreters.com/introduction.html)". This project can be run in REPL mode or against a file by passing it a the first argument.
 
 ## Running the REPL
 `dotnet run` from the _/src_ folder
