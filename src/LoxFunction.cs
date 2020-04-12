@@ -7,10 +7,12 @@ namespace shlox
     public class LoxFunction : ICallable
     {
         private readonly Function _declaration;
+        private readonly Environment _closure;
 
-        public LoxFunction(Function declaration)
+        public LoxFunction(Function declaration, Environment closure)
         {
             _declaration = declaration;
+            _closure = closure;
         }
 
         public int Arity() => _declaration.Parameters.Count;
@@ -18,7 +20,7 @@ namespace shlox
         public object Call(Interpreter interpreter, List<object> arguments)
         {
             // Create a new environment encapsulating the globals
-            var environment = new Environment(interpreter.Globals);
+            var environment = new Environment(_closure);
 
             // Bind the arguments to function parameters
             for (int i = 0; i < _declaration.Parameters.Count; i++)

@@ -26,6 +26,7 @@ namespace shlox
                 RunPrompt();
             }
         }
+
         private static void RunFile(string path)
         {
             var text = File.ReadAllText(path);
