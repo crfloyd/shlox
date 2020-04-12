@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using shlox.Exceptions;
 
@@ -6,11 +7,14 @@ namespace shlox
 {
     public class Interpreter : IExprVisitor<object>, IStmtVisitor<object>
     {
+        public Environment Globals { get; }
         private Environment _environment;
 
         public Interpreter()
         {
-            _environment = new Environment();
+            Globals = new Environment();
+            _environment = Globals;
+            Globals.Define("clock", new Clock());
         }
 
         public void Interpret(IEnumerable<Stmt> statements)
@@ -55,10 +59,27 @@ namespace shlox
                     string ls when right is double ld => $"{ls}{ld}",
                     double ld when right is double rd => ld + rd,
                     string ls when right is string rs => ls + rs,
-                    _ => throw new RuntimeException(expr.Op, "Operands must be two numbers or two strings.")
+                    _ => throw new RuntimeException(expr.Op,
+                        "Operands must be two numbers or two strings.")
                 },
                 _ => null
             };
+        }
+
+        public object VisitCallExpr(Call expr)
+        {
+            if (!(Evaluate(expr.Callee) is ICallable func))
+            {
+                throw new RuntimeException(expr.Paren,
+                    "Can only call functions and classes.");
+            }
+            var arguments = expr.Arguments.Select(a => Evaluate(a)).ToList();
+            if (arguments.Count != func.Arity())
+            {
+                throw new RuntimeException(expr.Paren,
+                    $"Expected {func.Arity()} arguments but got {arguments.Count()}.");
+            }
+            return func.Call(this, arguments);
         }
 
         public object VisitGroupingExpr(Grouping expr) => Evaluate(expr.Expression);
@@ -144,6 +165,13 @@ namespace shlox
             return null;
         }
 
+        public object VisitFunctionStmt(Function stmt)
+        {
+            var function = new LoxFunction(stmt);
+            _environment.Define(stmt.Name.Lexeme, function);
+            return null;
+        }
+
         public object VisitPrintStmt(Print stmt)
         {
             var value = Evaluate(stmt.Expr);
@@ -196,7 +224,7 @@ namespace shlox
             return null;
         }
 
-        private void ExecuteBlock(List<Stmt> statements, Environment environment)
+        public void ExecuteBlock(List<Stmt> statements, Environment environment)
         {
             var previous = _environment;
             try
@@ -211,6 +239,16 @@ namespace shlox
             {
                 _environment = previous;
             }
+        }
+
+        private class Clock : ICallable
+        {
+            public int Arity() => 0;
+
+            public object Call(Interpreter interpreter, List<object> arguments)
+                => (double)DateTime.Now.Ticks;
+
+            public override string ToString() => "<native fn>";
         }
     }
 }

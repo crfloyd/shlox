@@ -25,6 +25,11 @@ namespace shlox
             return Parenthesize(expr.Op.Lexeme, expr.Left, expr.Right);
         }
 
+        public string VisitCallExpr(Call expr)
+        {
+            throw new System.NotImplementedException();
+        }
+
         public string VisitGroupingExpr(Grouping expr)
         {
             return Parenthesize("group", expr.Expression);

@@ -29,9 +29,11 @@ namespace shlox
         {
             try
             {
-                return Match(TokenType.VAR)
-                    ? VarDeclaration()
-                    : Statement();
+                return Match(TokenType.FUN)
+                    ? Function("function")
+                    : Match(TokenType.VAR)
+                        ? VarDeclaration()
+                        : Statement();
             }
             catch (ParseException)
             {
@@ -155,6 +157,29 @@ namespace shlox
             return new Expression(expr);
         }
 
+        private Function Function(string kind)
+        {
+            var name = Consume(TokenType.IDENTIFIER, $"Expect {kind} name.");
+            Consume(TokenType.LEFT_PAREN, $"Expect '(' after {kind} name.");
+            var parameters = new List<Token>();
+            if (!Check(TokenType.RIGHT_PAREN))
+            {
+                do
+                {
+                    if (parameters.Count() >= 255)
+                    {
+                        Error(Peek(), "Cannot have more then 255 parameters."); 
+                    }
+                    parameters.Add(Consume(TokenType.IDENTIFIER, "Expect parameter name."));
+                } while (Match(TokenType.COMMA));
+            }
+
+            Consume(TokenType.RIGHT_PAREN, "Expect ')' after parameters.");
+            Consume(TokenType.LEFT_BRACE, $"Expect '{{' before {kind} body");
+            var body = Block();
+            return new Function(name, parameters, body);
+        }
+
         private Expr Assignment()
         {
             var expr = Or();
@@ -272,7 +297,45 @@ namespace shlox
                 var right = Unary();
                 return new Unary(op, right);
             }
-            return Primary();
+            return Call();
+        }
+
+        private Expr Call()
+        {
+            var expr = Primary();
+
+            while (true)
+            {
+                if (Match(TokenType.LEFT_PAREN))
+                {
+                    expr = FinishCall(expr);
+                }
+                else
+                {
+                    break;
+                }
+            }
+            return expr;
+        }
+
+        private Expr FinishCall(Expr callee)
+        {
+            var arguments = new List<Expr>();
+            if (!Check(TokenType.RIGHT_PAREN))
+            {
+                // Parse Arguments
+                do
+                {
+                    arguments.Add(Expression());
+                    if (arguments.Count() >= 255)
+                    {
+                        Error(Peek(), "Cannot have more than 255 arguments.");
+                    }
+                } while (Match(TokenType.COMMA));
+            }
+
+            var paren = Consume(TokenType.RIGHT_PAREN, "Expect ')' after arguments.");
+            return new Call(callee, paren, arguments);
         }
 
         /// <summary>
