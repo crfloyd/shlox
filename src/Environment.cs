@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using shlox.Exceptions;
 
 namespace shlox
@@ -18,12 +20,17 @@ namespace shlox
 
         public void Define(string name, object value) => Values[name] = value;
 
+        public object GetAt(int distance, string name) => Ancestor(distance).Values[name];
+
         public object Get(Token name)
             => Values.TryGetValue(name.Lexeme, out var v)
                 ? v
                 : Enclosing != null
                     ? Enclosing.Get(name)
                     : throw new RuntimeException(name, $"Undefined variable {name.Lexeme}.");
+
+        public void AssignAt(int distance, Token name, object value)
+            => Ancestor(distance).Values[name.Lexeme] = value;
 
         public void Assign(Token name, object value)
         {
@@ -37,6 +44,16 @@ namespace shlox
                 throw new RuntimeException(name, $"Undefined variable '{name.Lexeme}'.");
             }
             Values[name.Lexeme] = value;
+        }
+
+        public Environment Ancestor(int distance)
+        {
+            Environment env = this;
+            foreach (var i in Enumerable.Range(0, distance))
+            {
+                env = env.Enclosing;
+            }
+            return env;
         }
     }
 }

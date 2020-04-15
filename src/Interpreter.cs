@@ -9,11 +9,13 @@ namespace shlox
     {
         public Environment Globals { get; }
         private Environment _environment;
+        private Dictionary<Expr, int> _locals;
 
         public Interpreter()
         {
             Globals = new Environment();
             _environment = Globals;
+            _locals = new Dictionary<Expr, int>();
             Globals.Define("clock", new Clock());
         }
 
@@ -111,8 +113,17 @@ namespace shlox
             };
         }
 
-        public object VisitVariableExpr(Variable expr) => _environment.Get(expr.Name);
+        public object VisitVariableExpr(Variable expr) => LookupVariable(expr.Name, expr);
 
+        private object LookupVariable(Token name, Variable expr)
+        {
+            if (_locals.TryGetValue(expr, out var distance))
+            {
+                return _environment.GetAt(distance, name.Lexeme);
+            }
+            return Globals.Get(name);
+        }
+        
         private bool CheckNumberOperand(Token op, object operand)
         {
             if (operand is double) return true;
@@ -158,6 +169,8 @@ namespace shlox
         private object Evaluate(Expr expr) => expr.Accept(this);
 
         private void Execute(Stmt stmt) => stmt.Accept(this);
+
+        public void Resolve(Expr expr, int depth) => _locals[expr] = depth;
 
         public object VisitExpressionStmt(Expression stmt)
         {
@@ -207,8 +220,15 @@ namespace shlox
         public object VisitAssignExpr(Assign expr)
         {
             var value = Evaluate(expr.Value);
-            _environment.Assign(expr.Name, value);
-            return null;
+            if (_locals.TryGetValue(expr, out var distance))
+            {
+                _environment.AssignAt(distance, expr.Name, value);
+            }
+            else
+            {
+                Globals.Assign(expr.Name, value);
+            }
+            return value;
         }
 
         public object VisitBlockStmt(Block stmt)

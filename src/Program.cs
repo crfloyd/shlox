@@ -58,6 +58,13 @@ namespace shlox
             // Stop if there was a syntax error
             if (_hadError) return;
 
+            // Run the resolver for static variable resolution
+            var resolver = new Resolver(_interpreter);
+            resolver.Resolve(statements);
+
+            // Stop if there was a resolution error
+            if (_hadError) return;
+
             //Console.WriteLine(new AstPrinter().Print(expression));
             _interpreter.Interpret(statements);
 
